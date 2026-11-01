@@ -432,9 +432,10 @@ def _(ctx):
 
 
 def head(ctx, scale=1.0):
-    """(length, half width) of an arrowhead for this weight."""
-    hw = (95 + 0.5 * ctx.t) * scale
-    return hw * 1.9, hw
+    """(length, half width) of an arrowhead for this weight: wide (about 37 degrees
+    either side of the shaft) so the heads stay visible at small sizes."""
+    hw = (115 + 0.6 * ctx.t) * scale
+    return hw * 1.35, hw
 
 
 @recipe("uni2330", 0x2330)  # ⌰ total runout
@@ -444,8 +445,8 @@ def _(ctx):
     ang = math.radians(66)
     run = (y1 - y0) / math.tan(ang)
     out = [rect(X0, y0, 380, y0 + t)]
-    for x in (60, 290):
-        out += arrow((x, y0 + t / 2), (x + run, y1), t, *head(ctx, 0.85))
+    for x in (50, 270):
+        out += arrow((x, y0 + t / 2), (x + run, y1), t, *head(ctx, 0.8))
     return Shape(out)
 
 
@@ -520,11 +521,14 @@ def _(ctx):
 
 @recipe("uni2331", 0x2331)  # ⌱ dimension origin
 def _(ctx):
+    # The circle marks the origin: it is centred where the extension line
+    # (vertical) meets the dimension line, which runs from that point to the
+    # arrowhead. Inner lines are lighter so the circle stays readable.
     t = ctx.t
-    r = 150
+    r = 165
     cx = X0 + r
-    # the shaft starts at the circle instead of crossing it
-    return Shape(ring(cx, AXIS, r, t) + arrow((cx + r - t / 2, AXIS), (X1 + 5, AXIS), t, *head(ctx, 0.9)))
+    return Shape(ring(cx, AXIS, r, t) + [vbar(cx, AXIS - 290, AXIS + 290, inner(ctx))]
+                 + arrow((cx, AXIS), (X1 + 5, AXIS), inner(ctx), *head(ctx, 0.72)))
 
 
 @recipe("uni2104", 0x2104)  # ℄ centre line
