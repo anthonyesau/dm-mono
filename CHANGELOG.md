@@ -1,5 +1,11 @@
 # DM Mono Changelog
 
+## Unreleased
+
+- Variable fonts `DMMono[wght].ttf` and `DMMono-Italic[wght].ttf`
+  (wght 300–500, default Regular), with STAT and named instances,
+  built by `source/build.sh` into `exports/variable/`
+
 ## v1.100
 
 Technical symbol extension (173 new glyphs, 152 new code points):

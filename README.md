@@ -50,6 +50,15 @@ no-break spaces
 * `numr`, `dnom`: numerator and denominator figures.
 * `sups`, `subs`, `sinf`: superior and inferior figures, `+ - = ( )`.
 
+### Variable fonts
+
+`exports/variable/` holds two variable fonts, `DMMono[wght].ttf` and
+`DMMono-Italic[wght].ttf`, with a weight axis from 300 (Light) through 400
+(Regular, the default) to 500 (Medium). The range is set by the two
+masters each source has; a wider range would need new Thin or Bold masters.
+Named instances and the STAT table match the static fonts, so apps pair the
+upright and italic files as one family.
+
 ### Building
 
 The new glyphs are generated into the Glyphs sources by
