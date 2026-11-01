@@ -31,8 +31,10 @@ alongside the original glyphs.
 
 **Balloons:** ⓪ ①–⑳
 
-**Fractions:** ⅐ ⅑ ⅒ ⅓ ⅔ ⅕ ⅖ ⅗ ⅘ ⅙ ⅚ ⅛ ⅜ ⅝ ⅞ ↉ ⅟ in the same stacked
-style as the original ½ ¼ ¾
+**Fractions:** ½ ¼ ¾ ⅐ ⅑ ⅒ ⅓ ⅔ ⅕ ⅖ ⅗ ⅘ ⅙ ⅚ ⅛ ⅜ ⅝ ⅞ ↉ ⅟, all diagonal,
+with figures almost as tall as the superiors and a zero without its slash.
+½ ¼ ¾ were redrawn this way too: the original stacked versions had figures
+only 40% of cap height, too small to read at text sizes.
 
 **Superscripts & subscripts:** ⁰–⁹ ⁺ ⁻ ⁼ ⁽ ⁾ ⁿ and ₀–₉ ₊ ₋ ₌ ₍ ₎
 
@@ -45,7 +47,7 @@ no-break spaces
 
 * `frac`: any fraction (`3/16`, `5/64`, `11/8`) becomes numerator, fraction
   slash and denominator figures. `1/2`, `1/8`, `2/3` and the other
-  single-figure fractions turn into the stacked one-cell glyph, as before.
+  single-figure fractions turn into the one-cell glyph, as before.
   Dates such as `12/31/2020` are left alone.
 * `numr`, `dnom`: numerator and denominator figures.
 * `sups`, `subs`, `sinf`: superior and inferior figures, `+ - = ( )`.
