@@ -36,8 +36,7 @@ class Ctx:
 
 
 DIGITS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
-FRAC_CAP = 282     # height of the fraction figures (flat glyphs)
-NUMR_SHIFT = 417   # numerators sit this far above the denominators
+FRAC_CAP = 282     # height of the balloon figures (flat glyphs)
 SUP_BOTTOM = 280
 INF_SHIFT = -420
 
@@ -57,28 +56,39 @@ def comps(*items):
 
 # =============================================================== small figures
 
-def designer_dnom(ctx, digit):
-    """Fraction-size figures the designer already drew inside ½ ¼ ¾."""
-    if digit == "one":
-        return [c.translate(0, -NUMR_SHIFT) for c in ctx.src("onehalf", paths=[2, 3])]
-    if digit == "two":
-        return ctx.src("onehalf", paths=[0])
-    if digit == "three":
-        return [c.translate(0, -NUMR_SHIFT) for c in ctx.src("threequarters", paths=[3])]
-    if digit == "four":
-        return ctx.src("threequarters", paths=[0, 1])
-    return None
-
-
 def frac_figure(ctx, glyph, y_dst=0, cx_dst=300):
+    """Small figures for the balloons (282 units tall, like the original ½ ¼ ¾)."""
     s, dx, dy = ctx.frac
     return small_figure(ctx.src(glyph), s, s, dx, dy, cx_dst=cx_dst, y_dst=y_dst)
+
+
+# Fraction figures: diagonal fractions use figures nearly as tall as the
+# superiors (400 units), slightly condensed so a numerator, the slash and a
+# denominator fit in one cell. The zero drops its slash: fractions only hold
+# figures, and the slash fills the zero's counter at this size.
+FR_H, FR_SX = 400, 0.82
+NUMR_SHIFT = 300  # numerators sit 300 units above the denominators (300..700)
+
+
+def plain(ctx, digit):
+    cs = ctx.src(digit)
+    if digit == "zero":  # drop the slash: the contour made only of straight lines
+        cs = [c for c in cs if any(seg is not None for seg in c.segs)]
+    return cs
+
+
+def fr_figure(ctx, digit, sx=FR_SX, cx=300, h=FR_H):
+    s0, dx, dy = ctx.sup
+    s = (h - 2 * dy) / 700
+    out = small_figure(plain(ctx, digit), s * sx, s, dx, dy, y_dst=0)
+    b = _bounds(out)
+    return [c.translate(cx - (b[0] + b[2]) / 2, 0) for c in out]
 
 
 def make_dnom(digit):
     @recipe(digit + ".dnom")
     def _(ctx):
-        return Shape(designer_dnom(ctx, digit) or frac_figure(ctx, digit))
+        return Shape(fr_figure(ctx, digit))
 
 
 def make_numr(digit):
@@ -155,8 +165,13 @@ for _i, (_base, _u, _s, _c) in enumerate(SYM_SUPS):
 
 
 # ================================================================== fractions
+# Diagonal fractions in one cell: the numerator sits left and high, the
+# denominator right and low, either side of a steep fraction slash. ½ ¼ ¾ are
+# redrawn the same way (they replace the designer's stacked versions).
 
 FRACTIONS = [
+    ("onequarter", 0xBC, "one", "four"), ("onehalf", 0xBD, "one", "two"),
+    ("threequarters", 0xBE, "three", "four"),
     ("oneseventh", 0x2150, "one", "seven"), ("oneninth", 0x2151, "one", "nine"),
     ("onethird", 0x2153, "one", "three"), ("twothirds", 0x2154, "two", "three"),
     ("onefifth", 0x2155, "one", "five"), ("twofifths", 0x2156, "two", "five"),
@@ -166,12 +181,19 @@ FRACTIONS = [
     ("fiveeighths", 0x215D, "five", "eight"), ("seveneighths", 0x215E, "seven", "eight"),
     ("uni2189", 0x2189, "zero", "three"),
 ]
+REPLACES = {"onehalf", "onequarter", "threequarters"}  # designer glyphs these recipes redraw
+FR_DX = 150  # numerator and denominator sit this far either side of the centre
+SLASH_FROM, SLASH_TO = (230, 30), (370, 670)
+
+
+def bar_t(ctx):
+    return {"Light": 52, "Medium": 60}[ctx.master_name]
 
 
 def make_frac(name, uni, num, den):
     @recipe(name, uni)
     def _(ctx):
-        return comps((num + ".numr", 0, 0), ("fraction", 0, 0), (den + ".dnom", 0, 0))
+        return comps((num + ".numr", -FR_DX, 0), ("fraction.inline", 0, 0), (den + ".dnom", FR_DX, 0))
 
 
 for _f in FRACTIONS:
@@ -180,25 +202,32 @@ for _f in FRACTIONS:
 
 @recipe("onetenth", 0x2152)
 def _(ctx):
-    sx, sy, dx, dy = ctx.narrow
-    s = ctx.frac[0]
-    # denominator "10" drawn with narrower figures so both fit under the bar
-    one = [c.affine(0.8, 0, 0, 1, 0, 0) for c in designer_dnom(ctx, "one")]
-    zero = small_figure(ctx.src("zero"), s * 0.72, s, ctx.frac[1] * 0.85, ctx.frac[2])
-    out = _place_pair(one, zero, gap=14)
-    return Shape(out, [("one.numr", 0, 0), ("fraction", 0, 0)])
+    # Four figures and a slash have to share 600 units: the numerator 1 is
+    # narrower and moves left with the slash, and the "10" is a little
+    # shorter (and so narrower) than the other denominators.
+    num = [c.translate(0, NUMR_SHIFT) for c in fr_figure(ctx, "one", sx=0.66, cx=100)]
+    one, zero = fr_figure(ctx, "one", sx=0.72, cx=0, h=340), fr_figure(ctx, "zero", sx=0.72, cx=0, h=340)
+    zb, ob = _bounds(zero), _bounds(one)
+    zero = [c.translate(588 - zb[2], 0) for c in zero]
+    gap = 12
+    one = [c.translate(588 - (zb[2] - zb[0]) - gap - ob[2], 0) for c in one]
+    return Shape(num + one + zero + [slant_line((178, 30), (300, 670), bar_t(ctx))])
 
 
-@recipe("uni215F", 0x215F)
+@recipe("uni215F", 0x215F)  # ⅟ fraction numerator one
 def _(ctx):
-    return comps(("one.numr", 0, 0), ("fraction", 0, 0))
+    return comps(("one.numr", -FR_DX, 0), ("fraction.inline", 0, 0))
 
 
-@recipe("fraction.diag")
+@recipe("fraction.inline")  # the steep slash inside one-cell fractions
 def _(ctx):
-    bar_t = {"Light": 52, "Medium": 60}[ctx.master_name] * 1.1
+    return Shape([slant_line(SLASH_FROM, SLASH_TO, bar_t(ctx))])
+
+
+@recipe("fraction.diag")  # the frac feature's slash, alone in its cell, so wider
+def _(ctx):
     run = 700 / math.tan(SLASH_ANGLE)
-    return Shape([slant_line((300 - run / 2, 0), (300 + run / 2, 700), bar_t)])
+    return Shape([slant_line((300 - run / 2, 0), (300 + run / 2, 700), bar_t(ctx) * 1.1)])
 
 
 def _place_pair(left, right, gap):
@@ -247,7 +276,7 @@ def make_circled_number(n, uni):
     def _(ctx):
         if n < 10:
             d = DIGITS[n]
-            inner = designer_dnom(ctx, d) or frac_figure(ctx, d)
+            inner = frac_figure(ctx, d)
             inner = [c.translate(0, AXIS - FRAC_CAP / 2) for c in inner]
             b = _bounds(inner)
             inner = [c.translate(300 - (b[0] + b[2]) / 2, 0) for c in inner]
