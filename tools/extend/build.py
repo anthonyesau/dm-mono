@@ -16,7 +16,7 @@ sys.path.insert(0, HERE)
 
 import geo  # noqa: E402
 from fontsrc import contours  # noqa: E402
-from recipes import DIGITS, FRACTIONS, RECIPES, SUPERIOR_NAMES, SYM_SUPS, Ctx  # noqa: E402
+from recipes import DIGITS, FRACTIONS, RECIPES, REPLACES, SUPERIOR_NAMES, SYM_SUPS, Ctx  # noqa: E402
 
 SOURCES = [os.path.join(HERE, "..", "..", "source", n)
            for n in ("DMMono-MASTER.glyphs", "DMMono-Italics-MASTER.glyphs")]
@@ -56,7 +56,7 @@ def build_font(path):
     for name, uni, _ in RECIPES:
         g = font.glyphs[name]
         if g is not None:
-            if g.note != GENERATED_NOTE:
+            if g.note != GENERATED_NOTE and name not in REPLACES:
                 raise SystemExit(f"{name} already exists in {path} and was not generated")
             del font.glyphs[name]
         if uni is not None:
@@ -158,9 +158,7 @@ def feature_code():
     lines.append("lookup FracPrecomposed {")
     lines.append(f"\tignore sub {numr} {numr}' fraction.diag {dnom};")
     lines.append(f"\tignore sub {numr}' fraction.diag {dnom} {dnom};")
-    precomposed = [("onehalf", "one", "two"), ("onequarter", "one", "four"),
-                   ("threequarters", "three", "four")]
-    precomposed += [(n, a, b) for n, _, a, b in FRACTIONS]
+    precomposed = [(n, a, b) for n, _, a, b in FRACTIONS]
     for name, a, b in precomposed:
         lines.append(f"\tsub {a}.numr' fraction.diag' {b}.dnom' by {name};")
     lines.append("} FracPrecomposed;")
