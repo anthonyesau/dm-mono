@@ -35,7 +35,7 @@ def arc(cx, cy, r, a0, a1):
     return d
 
 
-def arrow(tail, tip, head=150, spread=math.radians(28), double=False):
+def arrow(tail, tip, head=150, spread=math.radians(37), double=False):
     """Shaft plus open arrowhead(s): the usual single-line drafting arrow."""
     dx, dy = tip[0] - tail[0], tip[1] - tail[1]
     L = math.hypot(dx, dy)
@@ -163,8 +163,9 @@ G["uni2335"] = [poly((45, 470), (300, 215), (555, 470))]
 G["uni2332"] = [poly((30, 80), (575, AXIS), (30, 620), closed=True), poly((30, AXIS), (480, AXIS))]
 G["uni2333"] = [poly((30, 95), (565, 95), (30, 575), closed=True)]
 G["uni232E"] = [circle(385, AXIS, 180)] + arrow((575, AXIS), (20, AXIS), head=130)
-# the shaft starts at the circle instead of crossing it
-G["uni2331"] = [circle(165, AXIS, 135)] + arrow((300, AXIS), (580, AXIS), head=130)
+# circle centred on the origin, crossed by the extension line; the dimension
+# line runs from the centre to the arrowhead
+G["uni2331"] = [circle(185, AXIS, 150), poly((185, 60), (185, 640))] + arrow((185, AXIS), (580, AXIS), head=120)
 # the C sits high, clear of the L's foot
 G["uni2104"] = [arc(290, 410, 235, math.radians(45), math.radians(315)),
                 poly((300, 700), (300, 0), (580, 0))]
