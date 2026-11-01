@@ -8,7 +8,7 @@ entry here: build.py composes them from the Glyphs source.
 import math
 
 import skeleton as SK
-from skeleton import G, circle, ref
+from skeleton import G, circle, oval, ref
 
 AXIS = 350
 SLASH = math.atan2(850, 346)
@@ -64,28 +64,41 @@ def bbox(name):
 
 
 # ---------------------------------------------------------- small figures
-FRAC_SX, FRAC_SY = 0.45, 0.403      # 700-unit figures -> 282-unit fraction figures
 SUP = 0.6                           # superiors: 420 units tall, bottom at 280
 
 for d in DIGITS:
-    G[d + ".dnom"] = [ref(d, FRAC_SX, 0, 0, FRAC_SY, 300 - 300 * FRAC_SX, 0)]
     G[d + "superior"] = [ref(d, SUP, 0, 0, SUP, 300 - 300 * SUP, 280)]
 for name, src, center in (("plus", "plus", AXIS), ("minus", "minus", AXIS), ("equal", "equal", AXIS),
                           ("parenleft", "parenleft", 313), ("parenright", "parenright", 313)):
     G[name + "superior"] = [ref(src, SUP, 0, 0, SUP, 300 - 300 * SUP, 490 - center * SUP)]
 G["nsuperior"] = [ref("n", SUP, 0, 0, SUP, 300 - 300 * SUP, 280)]
 
-# the original stacked fractions, redrawn from the fraction figures
-for name, num, den in (("onehalf", "one", "two"), ("onequarter", "one", "four"),
-                       ("threequarters", "three", "four")):
-    G[name] = [ref(num + ".dnom", f=417), ref("fraction"), ref(den + ".dnom")]
+# Diagonal fractions, laid out like the outline font: figures 400 units tall
+# and slightly condensed, the zero without its slash. Numerators, the
+# precomposed fractions (½ … ⅞, ↉, ⅟) are composed from the Glyphs source.
+G["zero.plain"] = [oval(300, 350, 230, 350)]
+FR_SY = 400 / 700
+FR_SX = FR_SY * 0.82
 
+
+def fraction_figure(digit, sy=FR_SY, sx=FR_SX, cx=300, y=0):
+    src = "zero.plain" if digit == "zero" else digit
+    x0, _, x1, _ = bbox(src)
+    return ref(src, sx, 0, 0, sy, cx - (x0 + x1) / 2 * sx, y)
+
+
+for d in DIGITS:
+    G[d + ".dnom"] = [fraction_figure(d)]
+
+G["fraction.inline"] = [poly((230, 30), (370, 670))]
 _run = 700 / math.tan(SLASH)
 G["fraction.diag"] = [poly((300 - _run / 2, 0), (300 + _run / 2, 700))]
-_n = 0.33  # narrower figures for the "10" under the bar
-G["onetenth"] = [ref("one.dnom", f=417), ref("fraction"),
-                 ref("one", _n, 0, 0, FRAC_SY, 205 - 300 * _n, 0),
-                 ref("zero", _n, 0, 0, FRAC_SY, 395 - 300 * _n, 0)]
+# ⅒: the numerator 1 and the slash move left; "10" uses shorter figures
+_ty = 340 / 700
+G["onetenth"] = [fraction_figure("one", sx=FR_SY * 0.66, cx=100, y=300),
+                 poly((178, 30), (300, 670)),
+                 fraction_figure("one", sy=_ty, sx=_ty * 0.72, cx=345),
+                 fraction_figure("zero", sy=_ty, sx=_ty * 0.72, cx=508)]
 
 
 # --------------------------------------------------- enclosed characters
