@@ -1,2 +1,4 @@
-fontmake==2.0.10
-git+https://github.com/googlefonts/gftools
+fontmake>=3.7
+glyphsLib>=6.6
+gftools>=0.9
+ttfautohint-py>=0.5

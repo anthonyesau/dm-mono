@@ -13,12 +13,10 @@ echo "Post processing"
 ttfs=$(ls ../exports/*.ttf)
 for ttf in $ttfs
 do
-	gftools fix-dsig -f $ttf;
-	ttfautohint $ttf $ttf.fix
+	python -m ttfautohint $ttf $ttf.fix
 	mv "$ttf.fix" $ttf;
 	gftools fix-hinting $ttf
 	mv "$ttf.fix" $ttf;
 	gftools fix-isfixedpitch --fonts $ttf;
 	mv "$ttf.fix" $ttf;
 done
-
