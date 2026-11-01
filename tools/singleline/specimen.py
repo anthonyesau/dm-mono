@@ -29,10 +29,10 @@ LINES = [
 def polylines(gs, name, steps=14):
     rp = RecordingPen()
     gs[name].draw(rp)
-    out, pts, n = [], [], 0
+    out, pts = [], []
     for op, a in rp.value:
         if op == "moveTo":
-            pts, n = [a[0]], 0
+            pts = [a[0]]
         elif op == "lineTo":
             pts.append(a[0])
         elif op == "curveTo":

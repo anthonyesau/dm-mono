@@ -8,7 +8,7 @@ entry here: build.py composes them from the Glyphs source.
 import math
 
 import skeleton as SK
-from skeleton import G, circle, oval, ref
+from skeleton import G, circle, ref
 
 AXIS = 350
 SLASH = math.atan2(850, 346)
