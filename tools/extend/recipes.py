@@ -269,13 +269,23 @@ for _n in range(1, 21):
 
 # =================================================== GD&T & drafting symbols
 
-CIRCLE_R = 265
+# The symbols use the whole monospaced cell: x from about 20 to 580 and,
+# where the shape allows, from the baseline up to cap height. Strokes inside
+# a shape (crosses, centre lines) are lighter so the counters stay open at
+# small sizes.
+X0, X1 = 20, 580
+CIRCLE_R = 280
+
+
+def inner(ctx):
+    """Stroke for lines that subdivide a shape."""
+    return ctx.t * 0.75
 
 
 @recipe("uni2300", 0x2300)  # ⌀ diameter sign
 def _(ctx):
     t = ctx.t
-    h = 340
+    h = 350
     run = h / math.tan(math.radians(60))
     return Shape(ring(300, AXIS, CIRCLE_R, t)
                  + [slant_line((300 - run, AXIS - h), (300 + run, AXIS + h), t)])
@@ -299,40 +309,41 @@ def _(ctx):
 @recipe("bullseye", 0x25CE)  # ◎ concentricity
 def _(ctx):
     t = ctx.t
-    return Shape(ring(300, AXIS, CIRCLE_R, t) + ring(300, AXIS, CIRCLE_R * 0.52, t))
+    return Shape(ring(300, AXIS, CIRCLE_R, t) + ring(300, AXIS, CIRCLE_R * 0.5, t))
 
 
 @recipe("uni232D", 0x232D)  # ⌭ cylindricity
 def _(ctx):
     t = ctx.t
-    r = 185
-    ang = math.radians(72)
-    off = (r - t / 2) / math.sin(ang)
-    half_h = 250
+    r = 205
+    ang = math.radians(74)
+    off = (r - t / 2) / math.sin(ang)  # lines tangent to the circle
+    half_h = 320
     run = half_h / math.tan(ang)
     out = ring(300, AXIS, r, t)
     for side in (-1, 1):
         cx = 300 + side * off
-        out.append(slant_line((cx - run, AXIS - half_h), (cx + run, AXIS + half_h), t))
+        # lighter lines keep the circle readable where they overlap it
+        out.append(slant_line((cx - run, AXIS - half_h), (cx + run, AXIS + half_h), inner(ctx)))
     return Shape(out)
 
 
 @recipe("uni2316", 0x2316)  # ⌖ position
 def _(ctx):
     t = ctx.t
-    arm = 270
-    return Shape(ring(300, AXIS, 170, t)
-                 + [hbar(300 - arm, 300 + arm, AXIS, t), vbar(300, AXIS - arm, AXIS + arm, t)])
+    arm = 290
+    return Shape(ring(300, AXIS, 205, t)
+                 + [hbar(300 - arm, 300 + arm, AXIS, inner(ctx)), vbar(300, AXIS - arm, AXIS + arm, inner(ctx))])
 
 
 @recipe("uni232F", 0x232F)  # ⌯ symmetry
 def _(ctx):
     t = ctx.t
-    gap = 165
-    return Shape([hbar(150, 450, AXIS + gap, t), hbar(50, 550, AXIS, t), hbar(150, 450, AXIS - gap, t)])
+    gap = 190
+    return Shape([hbar(120, 480, AXIS + gap, t), hbar(X0, X1, AXIS, t), hbar(120, 480, AXIS - gap, t)])
 
 
-ARC_BASE, ARC_R = 175, 250
+ARC_BASE, ARC_R = 140, 285
 
 
 @recipe("uni2312", 0x2312)  # ⌒ arc / profile of a line
@@ -347,16 +358,20 @@ def _(ctx):
                   rect(300 - ARC_R, ARC_BASE, 300 + ARC_R, ARC_BASE + t)])
 
 
-ANGLE_H, ANGLE_DEG = 520, 55
+ANGLE_H = 640
+
+
+def _angle_geom(ctx):
+    """Bottom-left start, top-right end and slope of the angle's diagonal."""
+    t = ctx.t
+    w = t / math.sin(math.radians(55)) / 2  # close enough for the cut width
+    p0, p1 = (X0 + w, 0), (X1 - 30 - w, ANGLE_H)
+    return p0, p1, math.atan2(p1[1] - p0[1], p1[0] - p0[0])
 
 
 def _angle(ctx):
-    t = ctx.t
-    ang = math.radians(ANGLE_DEG)
-    w = t / math.sin(ang) / 2
-    x0 = 80 + w
-    run = ANGLE_H / math.tan(ang)
-    return [rect(80, 0, 520, t), slant_line((x0, 0), (x0 + run, ANGLE_H), t)]
+    p0, p1, _ = _angle_geom(ctx)
+    return [rect(X0, 0, X1, ctx.t), slant_line(p0, p1, ctx.t)]
 
 
 @recipe("angle", 0x2220)  # ∠ angularity
@@ -367,15 +382,15 @@ def _(ctx):
 @recipe("measuredangle", 0x2221)  # ∡
 def _(ctx):
     t = ctx.t
-    r = 380
-    ang = math.radians(ANGLE_DEG)
-    return Shape(_angle(ctx) + [arc_stroke(80, 0, r, t, 0, ang - (t / 2) / r)])
+    r = 400
+    _, _, ang = _angle_geom(ctx)
+    return Shape(_angle(ctx) + [arc_stroke(X0, 0, r, t, 0, ang - (t / 2) / r)])
 
 
 @recipe("uni27C2", 0x27C2)  # ⟂ perpendicular
 def _(ctx):
     t = ctx.t
-    return Shape([rect(80, 0, 520, t), vbar(300, 0, 520, t)])
+    return Shape([rect(X0, 0, X1, t), vbar(300, 0, ANGLE_H, t)])
 
 
 @recipe("uni22A5", 0x22A5)  # ⊥ up tack
@@ -386,33 +401,33 @@ def _(ctx):
 @recipe("parallel", 0x2225)  # ∥
 def _(ctx):
     t = ctx.t
-    return Shape([vbar(300 - 95, 0, 700, t), vbar(300 + 95, 0, 700, t)])
+    return Shape([vbar(300 - 110, 0, 700, t), vbar(300 + 110, 0, 700, t)])
 
 
 @recipe("uni2AFD", 0x2AFD)  # ⫽ parallelism as drawn in GD&T frames
 def _(ctx):
     t = ctx.t
-    h = 640
+    h = 700
     y0 = AXIS - h / 2
     run = h / math.tan(SLASH_ANGLE)
     out = []
-    for cx in (300 - 95, 300 + 95):
+    for cx in (300 - 100, 300 + 100):
         out.append(slant_line((cx - run / 2, y0), (cx + run / 2, y0 + h), t))
     return Shape(out)
 
 
 @recipe("uni23E4", 0x23E4)  # ⏤ straightness
 def _(ctx):
-    return Shape([hbar(40, 560, AXIS, ctx.t)])
+    return Shape([hbar(X0, X1, AXIS, ctx.t)])
 
 
 @recipe("uni23E5", 0x23E5)  # ⏥ flatness
 def _(ctx):
-    h = 290
+    h = 380
     run = h / math.tan(math.radians(60))
     y0, y1 = AXIS - h / 2, AXIS + h / 2
-    base = 520 - run
-    pts = [(40, y0), (40 + base, y0), (560, y1), (560 - base, y1)]
+    base = (X1 - X0) - run
+    pts = [(X0, y0), (X0 + base, y0), (X1, y1), (X1 - base, y1)]
     return Shape(polygon_outline(pts, ctx.t))
 
 
@@ -425,18 +440,18 @@ def head(ctx, scale=1.0):
 @recipe("uni2330", 0x2330)  # ⌰ total runout
 def _(ctx):
     t = ctx.t
-    y0, y1 = 110, 640
+    y0, y1 = 60, 690
     ang = math.radians(66)
     run = (y1 - y0) / math.tan(ang)
-    out = [rect(50, y0, 390, y0 + t)]
-    for x in (100, 340):
-        out += arrow((x, y0 + t / 2), (x + run, y1), t, *head(ctx, 0.8))
+    out = [rect(X0, y0, 380, y0 + t)]
+    for x in (60, 290):
+        out += arrow((x, y0 + t / 2), (x + run, y1), t, *head(ctx, 0.85))
     return Shape(out)
 
 
 @recipe("arrowupright", 0x2197)  # ↗ circular runout
 def _(ctx):
-    a = 225
+    a = 245
     return Shape(arrow((300 - a, AXIS - a), (300 + a, AXIS + a), ctx.t, *head(ctx)))
 
 
@@ -446,12 +461,12 @@ def make_arrow(name, uni, tail, tip, double=False):
         return Shape(arrow(tail, tip, ctx.t, *head(ctx, 0.78 if double else 1.0), double=double))
 
 
-_A = 225
-make_arrow("arrowleft", 0x2190, (560, AXIS), (40, AXIS))
+_A = 245
+make_arrow("arrowleft", 0x2190, (X1, AXIS), (X0, AXIS))
 make_arrow("arrowup", 0x2191, (300, 0), (300, 700))
-make_arrow("arrowright", 0x2192, (40, AXIS), (560, AXIS))
+make_arrow("arrowright", 0x2192, (X0, AXIS), (X1, AXIS))
 make_arrow("arrowdown", 0x2193, (300, 700), (300, 0))
-make_arrow("arrowleftright", 0x2194, (30, AXIS), (570, AXIS), double=True)
+make_arrow("arrowleftright", 0x2194, (X0 - 5, AXIS), (X1 + 5, AXIS), double=True)
 make_arrow("arrowupdown", 0x2195, (300, 0), (300, 700), double=True)
 make_arrow("arrowupleft", 0x2196, (300 + _A, AXIS - _A), (300 - _A, AXIS + _A))
 make_arrow("arrowdownright", 0x2198, (300 - _A, AXIS + _A), (300 + _A, AXIS - _A))
@@ -461,20 +476,21 @@ make_arrow("arrowdownleft", 0x2199, (300 + _A, AXIS + _A), (300 - _A, AXIS - _A)
 @recipe("uni21A7", 0x21A7)  # ↧ depth
 def _(ctx):
     t = ctx.t
-    return Shape(arrow((300, 700 - t / 2), (300, 0), t, *head(ctx)) + [rect(130, 700 - t, 470, 700)])
+    return Shape(arrow((300, 700 - t / 2), (300, 0), t, *head(ctx)) + [rect(110, 700 - t, 490, 700)])
 
 
 @recipe("uni2334", 0x2334)  # ⌴ counterbore / spotface
 def _(ctx):
     t = ctx.t
-    y0, y1 = 190, 500
-    return Shape([rect(80, y0, 80 + t, y1), rect(520 - t, y0, 520, y1), rect(80, y0, 520, y0 + t)])
+    y0, y1 = 130, 570
+    return Shape([rect(X0 + 10, y0, X0 + 10 + t, y1), rect(X1 - 10 - t, y0, X1 - 10, y1),
+                  rect(X0 + 10, y0, X1 - 10, y0 + t)])
 
 
 @recipe("uni2335", 0x2335)  # ⌵ countersink
 def _(ctx):
     t = ctx.t
-    H = 225
+    H = 270
     y0 = AXIS - H / 2 - 10
     w = t * math.sqrt(2)
     return Shape([polygon([(300, y0), (300 + H, y0 + H), (300 + H - w, y0 + H), (300, y0 + w),
@@ -484,39 +500,43 @@ def _(ctx):
 @recipe("uni2332", 0x2332)  # ⌲ conical taper
 def _(ctx):
     t = ctx.t
-    h = 400
-    pts = [(50, AXIS - h / 2), (560, AXIS), (50, AXIS + h / 2)]
-    return Shape(polygon_outline(pts, t * 0.85) + [hbar(50, 470, AXIS, t * 0.85)])
+    h = 560
+    pts = [(X0, AXIS - h / 2), (X1 + 5, AXIS), (X0, AXIS + h / 2)]
+    return Shape(polygon_outline(pts, t * 0.9) + [hbar(X0, 470, AXIS, inner(ctx) * 0.85)])
 
 
 @recipe("uni2333", 0x2333)  # ⌳ slope
 def _(ctx):
-    pts = [(50, 170), (550, 170), (50, 500)]
+    pts = [(X0, 80), (X1, 80), (X0, 590)]
     return Shape(polygon_outline(pts, ctx.t * 0.9))
 
 
 @recipe("uni232E", 0x232E)  # ⌮ all around-profile
 def _(ctx):
     t = ctx.t
-    return Shape(ring(370, AXIS, 175, t) + arrow((545, AXIS), (40, AXIS), t, *head(ctx, 0.85)))
+    r = 195
+    return Shape(ring(X1 - r, AXIS, r, t) + arrow((X1 - 5, AXIS), (X0 - 5, AXIS), inner(ctx), *head(ctx, 0.9)))
 
 
 @recipe("uni2331", 0x2331)  # ⌱ dimension origin
 def _(ctx):
     t = ctx.t
-    return Shape(ring(170, AXIS, 120, t) + arrow((170, AXIS), (560, AXIS), t, *head(ctx, 0.85)))
+    r = 150
+    cx = X0 + r
+    # the shaft starts at the circle instead of crossing it
+    return Shape(ring(cx, AXIS, r, t) + arrow((cx + r - t / 2, AXIS), (X1 + 5, AXIS), t, *head(ctx, 0.9)))
 
 
 @recipe("uni2104", 0x2104)  # ℄ centre line
 def _(ctx):
     t = ctx.t
-    r = 255
-    out = [arc_stroke(300, AXIS, r, t, math.radians(48), math.radians(312))]
-    out += [vbar(300, 20, 680, t), rect(300 - t / 2, 20, 560, 20 + t)]
+    r, cy = 250, 410  # the C sits high, clear of the L's foot
+    out = [arc_stroke(290, cy, r, t, math.radians(45), math.radians(315))]
+    out += [vbar(300, 0, 700, t), rect(300 - t / 2, 0, X1, t)]
     return Shape(out)
 
 
-SQ = (80, 130, 520, 570)
+SQ = (40, 70, 560, 630)
 
 
 @recipe("whiteSquare", 0x25A1)  # □ square
@@ -531,7 +551,7 @@ def _(ctx):
 
 
 def _tri(up=True):
-    w = 230
+    w = 270
     h = 2 * w * math.sqrt(3) / 2
     y0 = AXIS - h / 2 + (-15 if up else 15)
     if up:
