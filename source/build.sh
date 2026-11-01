@@ -30,3 +30,6 @@ rm -rf master_ufo/ instance_ufo/
 python ../tools/variable.py $vf/DMMono-VF.ttf "$vf/DMMono[wght].ttf"
 python ../tools/variable.py $vf/DMMono-Italic-VF.ttf "$vf/DMMono-Italic[wght].ttf" --italic
 rm $vf/DMMono-VF.ttf $vf/DMMono-Italic-VF.ttf
+
+echo "Generating Single Line fonts"
+python ../tools/singleline/build.py

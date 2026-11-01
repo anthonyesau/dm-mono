@@ -59,6 +59,21 @@ masters each source has; a wider range would need new Thin or Bold masters.
 Named instances and the STAT table match the static fonts, so apps pair the
 upright and italic files as one family.
 
+### Single-line version
+
+`exports/singleline/` has **DM Mono Single Line**, a centre-line version of
+the whole character set (including the technical symbols) for engraving, CNC
+and laser marking:
+
+* `DMMonoSingleLine.otf` for Rhino and CAM software (out-and-back "double
+  stroke" paths)
+* `DMMonoSingleLine.shx` for LightBurn and AutoCAD (true open strokes)
+
+![Single-line specimen](docs/single-line.png)
+
+See `tools/singleline/README.md` for how to use it in Rhino, LightBurn and
+CAM software.
+
 ### Building
 
 The new glyphs are generated into the Glyphs sources by

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- DM Mono Single Line: centre-line OTF (out-and-back strokes, for Rhino and
+  CAM) and SHX (for LightBurn and AutoCAD) covering the full character set,
+  built by `tools/singleline/build.py`
+
 - Variable fonts `DMMono[wght].ttf` and `DMMono-Italic[wght].ttf`
   (wght 300–500, default Regular), with STAT and named instances,
   built by `source/build.sh` into `exports/variable/`
