@@ -114,68 +114,74 @@ for n in range(1, 21):
 
 
 # ------------------------------------------------- drafting and GD&T
-R = 233  # circle size of ⌀ ○ ◎ (centre line of the outline version)
-_h = 330
+# Same layout as the outline symbols (tools/extend/recipes.py): the shapes
+# use x 20-580 and up to cap height; lines here sit on the stroke centres.
+R = 265  # circle size of ⌀ ○ ◎
+_h = 345
 _r60 = _h / math.tan(math.radians(60))
 G["uni2300"] = [circle(300, AXIS, R), poly((300 - _r60, AXIS - _h), (300 + _r60, AXIS + _h))]
 G["whiteCircle"] = [circle(300, AXIS, R)]
 G["blackCircle"] = [circle(300, AXIS, r) for r in (R, R * 2 / 3, R / 3)] + [circle(300, AXIS, 8)]
-G["bullseye"] = [circle(300, AXIS, R), circle(300, AXIS, 105)]
+G["bullseye"] = [circle(300, AXIS, R), circle(300, AXIS, 135)]
 
-_cr, _ang, _hh = 155, math.radians(72), 250
-_off, _run72 = _cr / math.sin(_ang), _hh / math.tan(_ang)
+_cr, _ang, _hh = 180, math.radians(74), 320
+_off, _run74 = _cr / math.sin(_ang), _hh / math.tan(_ang)
 G["uni232D"] = [circle(300, AXIS, _cr)] + [
-    poly((300 + s * _off - _run72, AXIS - _hh), (300 + s * _off + _run72, AXIS + _hh)) for s in (-1, 1)]
-G["uni2316"] = [circle(300, AXIS, 140), poly((30, AXIS), (570, AXIS)), poly((300, 80), (300, 620))]
-G["uni232F"] = [poly((150, 515), (450, 515)), poly((50, AXIS), (550, AXIS)), poly((150, 185), (450, 185))]
-G["uni2312"] = [arc(300, 175, 218, 0, math.pi)]
-G["uni2313"] = [arc(300, 175, 218, 0, math.pi), poly((82, 175), (518, 175))]
-_aa = math.radians(55)
-G["angle"] = [poly((520, 0), (80, 0), (80 + 520 / math.tan(_aa), 520))]
-G["measuredangle"] = G["angle"] + [arc(80, 0, 360, 0, _aa)]
-G["uni27C2"] = [poly((80, 0), (520, 0)), poly((300, 0), (300, 520))]
-G["parallel"] = [poly((205, 0), (205, 700)), poly((395, 0), (395, 700))]
-_r2 = 640 / math.tan(SLASH)
-G["uni2AFD"] = [poly((cx - _r2 / 2, 30), (cx + _r2 / 2, 670)) for cx in (205, 395)]
-G["uni23E4"] = [poly((40, AXIS), (560, AXIS))]
-G["uni23E5"] = [poly((70, 215), (395, 215), (530, 485), (205, 485), closed=True)]
+    poly((300 + s * _off - _run74, AXIS - _hh), (300 + s * _off + _run74, AXIS + _hh)) for s in (-1, 1)]
+G["uni2316"] = [circle(300, AXIS, 190), poly((15, AXIS), (585, AXIS)), poly((300, 65), (300, 635))]
+G["uni232F"] = [poly((120, 540), (480, 540)), poly((20, AXIS), (580, AXIS)), poly((120, 160), (480, 160))]
+G["uni2312"] = [arc(300, 140, 270, 0, math.pi)]
+G["uni2313"] = [arc(300, 140, 270, 0, math.pi), poly((30, 140), (570, 140))]
+_ap = (550, 640)
+_aa = math.atan2(_ap[1], _ap[0] - 20)
+G["angle"] = [poly((580, 0), (20, 0), _ap)]
+G["measuredangle"] = G["angle"] + [arc(20, 0, 400, 0, _aa)]
+G["uni27C2"] = [poly((20, 0), (580, 0)), poly((300, 0), (300, 640))]
+G["parallel"] = [poly((190, 0), (190, 700)), poly((410, 0), (410, 700))]
+_r2 = 700 / math.tan(SLASH)
+G["uni2AFD"] = [poly((cx - _r2 / 2, 0), (cx + _r2 / 2, 700)) for cx in (200, 400)]
+G["uni23E4"] = [poly((20, AXIS), (580, AXIS))]
+G["uni23E5"] = [poly((40, 180), (360, 180), (560, 520), (240, 520), closed=True)]
 _ta = math.radians(66)
-_tr = (640 - 110) / math.tan(_ta)
-G["uni2330"] = [poly((50, 110), (390, 110))] + sum(
-    (arrow((x, 110), (x + _tr, 640), head=120) for x in (100, 340)), [])
-_A = 225
-G["arrowleft"] = arrow((560, AXIS), (40, AXIS))
+_tr = (690 - 60) / math.tan(_ta)
+G["uni2330"] = [poly((20, 60), (380, 60))] + sum(
+    (arrow((x, 60), (x + _tr, 690), head=120) for x in (60, 290)), [])
+_A = 245
+G["arrowleft"] = arrow((580, AXIS), (20, AXIS))
 G["arrowup"] = arrow((300, 0), (300, 700))
-G["arrowright"] = arrow((40, AXIS), (560, AXIS))
+G["arrowright"] = arrow((20, AXIS), (580, AXIS))
 G["arrowdown"] = arrow((300, 700), (300, 0))
-G["arrowleftright"] = arrow((30, AXIS), (570, AXIS), head=130, double=True)
+G["arrowleftright"] = arrow((15, AXIS), (585, AXIS), head=130, double=True)
 G["arrowupdown"] = arrow((300, 0), (300, 700), head=130, double=True)
 G["arrowupleft"] = arrow((300 + _A, AXIS - _A), (300 - _A, AXIS + _A))
 G["arrowupright"] = arrow((300 - _A, AXIS - _A), (300 + _A, AXIS + _A))
 G["arrowdownright"] = arrow((300 - _A, AXIS + _A), (300 + _A, AXIS - _A))
 G["arrowdownleft"] = arrow((300 + _A, AXIS + _A), (300 - _A, AXIS - _A))
-G["uni21A7"] = arrow((300, 700), (300, 0)) + [poly((130, 700), (470, 700))]
-G["uni2334"] = [poly((80, 500), (80, 190), (520, 190), (520, 500))]
-G["uni2335"] = [poly((75, 465), (300, 240), (525, 465))]
-G["uni2332"] = [poly((50, 150), (560, AXIS), (50, 550), closed=True), poly((50, AXIS), (560, AXIS))]
-G["uni2333"] = [poly((50, 170), (550, 170), (50, 500), closed=True)]
-G["uni232E"] = [circle(370, AXIS, 150)] + arrow((545, AXIS), (40, AXIS), head=130)
-G["uni2331"] = [circle(170, AXIS, 95)] + arrow((170, AXIS), (560, AXIS), head=130)
-G["uni2104"] = [arc(300, AXIS, 228, math.radians(48), math.radians(312)),
-                poly((300, 680), (300, 20), (560, 20))]
-_sq = [(112, 162), (488, 162), (488, 538), (112, 538)]
+G["uni21A7"] = arrow((300, 700), (300, 0)) + [poly((110, 700), (490, 700))]
+G["uni2334"] = [poly((45, 570), (45, 140), (555, 140), (555, 570))]
+G["uni2335"] = [poly((45, 470), (300, 215), (555, 470))]
+G["uni2332"] = [poly((30, 80), (575, AXIS), (30, 620), closed=True), poly((30, AXIS), (480, AXIS))]
+G["uni2333"] = [poly((30, 95), (565, 95), (30, 575), closed=True)]
+G["uni232E"] = [circle(385, AXIS, 180)] + arrow((575, AXIS), (20, AXIS), head=130)
+# the shaft starts at the circle instead of crossing it
+G["uni2331"] = [circle(165, AXIS, 135)] + arrow((300, AXIS), (580, AXIS), head=130)
+# the C sits high, clear of the L's foot
+G["uni2104"] = [arc(290, 410, 235, math.radians(45), math.radians(315)),
+                poly((300, 700), (300, 0), (580, 0))]
+_sq = [(70, 100), (530, 100), (530, 600), (70, 600)]
 G["whiteSquare"] = [poly(*_sq, closed=True)]
-G["blackSquare"] = [poly((112 + i, 162 + i), (488 - i, 162 + i), (488 - i, 538 - i), (112 + i, 538 - i),
+G["blackSquare"] = [poly((70 + i, 100 + i), (530 - i, 100 + i), (530 - i, 600 - i), (70 + i, 600 - i),
                          closed=True) for i in (0, 60, 120, 180)]
 
 
 def _tri(up, inset=0):
-    """Equilateral triangle (side 460) shrunk towards its centroid by `inset` units."""
-    h = 230 * math.sqrt(3)
+    """Equilateral triangle (side 510) shrunk towards its centroid by `inset` units."""
+    w = 255
+    h = w * math.sqrt(3)
     if up:
-        pts = [(70, AXIS - 15 - h / 2), (530, AXIS - 15 - h / 2), (300, AXIS - 15 + h / 2)]
+        pts = [(300 - w, AXIS - 15 - h / 2), (300 + w, AXIS - 15 - h / 2), (300, AXIS - 15 + h / 2)]
     else:
-        pts = [(70, AXIS + 15 + h / 2), (300, AXIS + 15 - h / 2), (530, AXIS + 15 + h / 2)]
+        pts = [(300 - w, AXIS + 15 + h / 2), (300, AXIS + 15 - h / 2), (300 + w, AXIS + 15 + h / 2)]
     cx = sum(p[0] for p in pts) / 3
     cy = sum(p[1] for p in pts) / 3
     k = 1 - inset / (h / 3)  # inset measured at the inscribed circle
@@ -184,8 +190,8 @@ def _tri(up, inset=0):
 
 G["whiteUpPointingTriangle"] = [poly(*_tri(True), closed=True)]
 G["whiteDownPointingTriangle"] = [poly(*_tri(False), closed=True)]
-G["blackUpPointingTriangle"] = [poly(*_tri(True, i), closed=True) for i in (0, 40, 80, 120)]
-G["blackDownPointingTriangle"] = [poly(*_tri(False, i), closed=True) for i in (0, 40, 80, 120)]
+G["blackUpPointingTriangle"] = [poly(*_tri(True, i), closed=True) for i in (0, 45, 90, 135)]
+G["blackDownPointingTriangle"] = [poly(*_tri(False, i), closed=True) for i in (0, 45, 90, 135)]
 
 # ------------------------------------------------------------- math extras
 G["minusplus"] = [poly((80, 488), (520, 488)), poly((80, 170), (520, 170)), poly((300, 0), (300, 340))]
